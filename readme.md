@@ -10,14 +10,14 @@
 #### 获得appid和hash
     需要在 https://my.telegram.org/ 用手机号注册
 获得后修改`join.py`中`TelegramClient`创建的参数
-`TelegramClient`创建时可以指定代理
+`TelegramClient`创建时可以指定代理
 
 
 #### 登陆
-    首次启动会在要求输入手机号，获取验证码登陆，然后会生*.session文件，重复运行不需要再登陆
+    首次启动会在要求输入手机号，获取验证码登陆
+    登陆后会生`*.session`文件，再次运行会使用session登陆
     所有邀请均由登陆用户执行
 
-#### 登陆
 #### 运行环境 
     python3
 #### 依赖库

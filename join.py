@@ -3,27 +3,21 @@ from telethon import TelegramClient, sync
 from telethon.tl.functions.channels import GetParticipantsRequest
 from telethon.tl.types import ChannelParticipantsSearch
 from time import sleep
-
-from telethon.tl.functions.messages import AddChatUserRequest
 from telethon.tl.functions.channels import InviteToChannelRequest
-
-import sys
 import socks
+import random
 
-if len(sys.argv) < 3:
-    print("需要指定导入的源和目标群名称 \n python3 join.py source dest")
-    sys.exit(2)
+# 对方的群组
+source_name = "Cyasmr"
+# 自己的群组
+dest_name = "taotujingxuan"
 
-source_name = sys.argv[1]
-dest_name = sys.argv[2]
-
+proxy = (socks.SOCKS5, "127.0.0.1", 1080)
 # start client
-client = TelegramClient('demo',
-    11111, # 这里填 app_id
-    'aaaaaaaaa', # 这里填 api_hash
-    proxy=(socks.SOCKS5, 'localhost', 1086)
-).start()
-      
+api_id = 1234567
+api_hash = "xxxxxxxxx"
+client = TelegramClient('anon', api_id, api_hash, proxy=proxy).start()
+
 offset = 0
 limit = 100
 
@@ -38,16 +32,29 @@ if type(source_info) is telethon.tl.types.Channel:
             if not participants.users:
                 break
             offset += len(participants.users)
+            num = 0
             for user in participants.users:
                 if user.username is not None:
-                    print(user.username)
+                    print(user.username + ": ", end="")
                     try:
                         client(InviteToChannelRequest(dest_info.id, [user.username]))
-                    except:
-                        print('邀请失败')
-                    sleep(1) #防止被服务器bind
+                    except telethon.errors.rpcerrorlist.PeerFloodError:
+                        print("请求过多")
+                    except telethon.errors.rpcerrorlist.UserPrivacyRestrictedError:
+                        print("对方设置了隐私或者无用户名")
+                    except telethon.errors.rpcerrorlist.UserNotMutualContactError:
+                        print("无法获取账户的相关信息")
+                    except telethon.errors.rpcerrorlist.FloodWaitError as e:
+                        exit("被TG限制暂时无法使用,需要等待: {}小时".format(int(str(e).split(" ")[3]) // 60 // 60))
+                    except telethon.errors.rpcerrorlist.UserBotError:
+                        print("机器人，跳过")
+                    else:
+                        num += 1
+                        print("邀请成功,{}人".format(num))
+                    # 随机秒数
+                    x = lambda: int(random.randint(1, 10))
+                    sleep(x())  # 防止被服务器bind
     else:
-        print(dest_name,"不是一个频道")
+        print(dest_name, "不是一个频道")
 else:
-    print(source_name,"不是一个频道")
-
+    print(source_name, "不是一个频道")
